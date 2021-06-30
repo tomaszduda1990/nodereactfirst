@@ -50,7 +50,7 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('URL')
+    fetch('http://localhost:8080/feed/posts ')
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -106,12 +106,23 @@ class Feed extends Component {
       editLoading: true
     });
     // Set up data (with image!)
-    let url = 'URL';
+    let url = 'http://localhost:8080/feed/post';
+    const requestSettings = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: postData.title,
+        content: postData.content,
+      })
+    };
     if (this.state.editPost) {
       url = 'URL';
+
     }
 
-    fetch(url)
+    fetch(url, requestSettings)
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error('Creating or editing a post failed!');
@@ -126,6 +137,7 @@ class Feed extends Component {
           creator: resData.post.creator,
           createdAt: resData.post.createdAt
         };
+        console.log(post);
         this.setState(prevState => {
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {
@@ -136,6 +148,7 @@ class Feed extends Component {
           } else if (prevState.posts.length < 2) {
             updatedPosts = prevState.posts.concat(post);
           }
+          console.log(updatedPosts);
           return {
             posts: updatedPosts,
             isEditing: false,
