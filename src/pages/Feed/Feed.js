@@ -59,7 +59,12 @@ class Feed extends Component {
       })
       .then(resData => {
         this.setState({
-          posts: resData.posts,
+          posts: resData.posts.map(post => {
+            return {
+              ...post,
+              imagePath: post.imageUrl
+            }
+          }),
           totalPosts: resData.totalItems,
           postsLoading: false
         });
@@ -105,20 +110,19 @@ class Feed extends Component {
     this.setState({
       editLoading: true
     });
+    const formData = new FormData();
+    formData.append('title', postData.title)
+    formData.append('content', postData.content)
+    formData.append('image', postData.image)
     // Set up data (with image!)
     let url = 'http://localhost:8080/feed/post';
     const requestSettings = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        title: postData.title,
-        content: postData.content,
-      })
+      body: formData
     };
     if (this.state.editPost) {
-      url = 'URL';
+      url = 'http://localhost:8080/feed/post/' + this.state.editPost._id;
+      requestSettings.method = "PUT"
 
     }
 
@@ -133,11 +137,11 @@ class Feed extends Component {
         const post = {
           _id: resData.post._id,
           title: resData.post.title,
+          image: resData.post.image,
           content: resData.post.content,
           creator: resData.post.creator,
           createdAt: resData.post.createdAt
         };
-        console.log(post);
         this.setState(prevState => {
           let updatedPosts = [...prevState.posts];
           if (prevState.editPost) {
@@ -148,7 +152,6 @@ class Feed extends Component {
           } else if (prevState.posts.length < 2) {
             updatedPosts = prevState.posts.concat(post);
           }
-          console.log(updatedPosts);
           return {
             posts: updatedPosts,
             isEditing: false,
